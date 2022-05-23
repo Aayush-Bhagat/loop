@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  shadowDatabaseUrl    = env("SHADOW_DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id             Int         @id @default(autoincrement())
+  username       String      @unique @db.VarChar(30)
+  email          String      @unique
+  displayName    String      @db.VarChar(50)
+  followingCount Int         @default(0)
+  followerCount  Int         @default(0)
+  password       String      @db.VarChar(40)
+  avatar         String?
+  bio            String?
+  role           Role
+  genre          String?
+  banner         String?
+  contactEmail   String?
+  userGenres     UserGenre[]
+  posts          Post[]
+  comments       Comment[]
+  UserLikes      UserLike[]
+  Songs          Song[]
+  followers      Follows[]   @relation("follower")
+  following      Follows[]   @relation("following")
+}
+
+model Follows {
+  id          Int  @id @default(autoincrement())
+  follower    User @relation("follower", fields: [followerId], references: [id])
+  followerId  Int
+  following   User @relation("following", fields: [followingId], references: [id])
+  followingId Int
+}
+
+model UserGenre {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+  genre  String
+}
+
+model Post {
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      Int
+  text        String
+  username    String
+  displayName String
+  avatar      String
+  image       String?
+  audio       String?
+  genre       String?
+  likes       Int         @default(0)
+  createdAt   DateTime    @default(now())
+  comments    Comment[]
+  UserLikes   UserLike[]
+  PostGenres  PostGenre[]
+}
+
+model PostGenre {
+  id     Int    @id @default(autoincrement())
+  post   Post   @relation(fields: [postId], references: [id])
+  postId Int
+  Genre  String
+}
+
+model Comment {
+  id          Int      @id @default(autoincrement())
+  post        Post     @relation(fields: [postId], references: [id])
+  postId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  username    String
+  displayName String
+  avatar      String?
+  text        String
+  createdAt   DateTime @default(now())
+}
+
+model UserLike {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+}
+
+model Song {
+  id     Int     @id @default(autoincrement())
+  user   User    @relation(fields: [userId], references: [id])
+  userId Int
+  name   String?
+  url    String
+  genre  String?
+  artist String?
+}
+
+enum Role {
+  LISTENER
+  ARTIST
+}
