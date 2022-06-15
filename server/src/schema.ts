@@ -1,4 +1,4 @@
-import { gql } from "apollo-server";
+import { gql } from "apollo-server-express";
 
 const typeDefs = gql`
   # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
@@ -30,7 +30,12 @@ const typeDefs = gql`
   # clients can execute, along with the return type for each. In this
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    Users(id:Int, username: String): [User!]
+    users(id:Int, username: String): [User!]
+  }
+
+  type Mutation{
+    register(email: String, username: String, password: String, role: String, displayName: String): User
+    login(username: String, password: String): User
   }
 `
 
